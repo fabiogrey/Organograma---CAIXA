@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Organograma do Projeto – CAIXA</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      background: #f1f5f9;
+    }
+    header {
+      background: linear-gradient(90deg, #003a8f, #0057b8);
+      color: #ffffff;
+      padding: 16px 24px;
+      font-size: 20px;
+      font-weight: bold;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    header span {
+      font-size: 14px;
+      font-weight: normal;
+      opacity: 0.9;
+    }
+    .toolbar {
+      display: flex;
+      gap: 12px;
+      padding: 12px 24px;
+      background: #e2e8f0;
+      border-bottom: 2px solid #cbd5e1;
+    }
+    .toolbar button {
+      padding: 8px 14px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      background: #0057b8;
+      color: #ffffff;
+      font-size: 14px;
+      font-weight: bold;
+    }
+    .toolbar button.secondary {
+      background: #64748b;
+    }
+    .board {
+      display: flex;
+      gap: 24px;
+      padding: 24px;
+      overflow-x: auto;
+      height: calc(100vh - 132px);
+    }
+    .column {
+      background: #ffffff;
+      min-width: 280px;
+      max-width: 280px;
+      border-radius: 12px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      display: flex;
+      flex-direction: column;
+      border-top: 6px solid #0057b8;
+    }
+    .column h3 {
+      margin: 0;
+      padding: 14px;
+      background: #f8fafc;
+      color: #0f172a;
+      font-size: 14px;
+      text-align: center;
+      font-weight: bold;
+      border-bottom: 1px solid #e2e8f0;
+    }
+    .cards {
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      flex-grow: 1;
+    }
+    .card {
+      padding: 10px;
+      border-radius: 8px;
+      background: #dbeafe;
+      color: #0f172a;
+      font-size: 13px;
+      cursor: move;
+      border-left: 5px solid #0057b8;
+    }
+    .card.yellow { border-left-color: #ca8a04; background: #fef9c3; }
+    .card.green { border-left-color: #15803d; background: #dcfce7; }
+    .card.pink { border-left-color: #be185d; background: #fce7f3; }
+    .card[contenteditable="true"]:focus {
+      outline: 2px dashed #0057b8;
+      background: #eff6ff;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    Organograma do Projeto – CAIXA
+    <span>Distribuição de Squads e Profissionais</span>
+  </header>
+
+  <div class="toolbar">
+    <button onclick="addColumn()">+ Squad</button>
+    <button onclick="addCard()">+ Profissional</button>
+    <button class="secondary" onclick="saveBoard()">Salvar</button>
+    <button class="secondary" onclick="loadBoard()">Carregar</button>
+  </div>
+
+  <div class="board" id="board"></div>
+
+  <script>
+    const board = document.getElementById('board');
+
+    function addColumn(name = 'Novo Squad') {
+      const column = document.createElement('div');
+      column.className = 'column';
+      column.innerHTML = `
+        <h3 contenteditable="true">${name}</h3>
+        <div class="cards" ondragover="allowDrop(event)" ondrop="drop(event)"></div>
+      `;
+      board.appendChild(column);
+    }
+
+    function addCard() {
+      const firstColumn = document.querySelector('.cards');
+      if (!firstColumn) {
+        alert('Crie um squad primeiro');
+        return;
+      }
+      const card = document.createElement('div');
+      card.className = 'card';
+      card.draggable = true;
+      card.ondragstart = drag;
+      card.contentEditable = true;
+      card.innerText = 'Nome | Skill | Senioridade';
+      firstColumn.appendChild(card);
+    }
+
+    function drag(ev) {
+      ev.dataTransfer.setData('text', ev.target.outerHTML);
+      ev.target.remove();
+    }
+
+    function allowDrop(ev) {
+      ev.preventDefault();
+    }
+
+    function drop(ev) {
+      ev.preventDefault();
+      const data = ev.dataTransfer.getData('text');
+      ev.target.insertAdjacentHTML('beforeend', data);
+      const newCard = ev.target.lastElementChild;
+      newCard.draggable = true;
+      newCard.ondragstart = drag;
+      newCard.contentEditable = true;
+    }
+
+    function saveBoard() {
+      localStorage.setItem('boardData', board.innerHTML);
+      alert('Organograma salvo no navegador');
+    }
+
+    function loadBoard() {
+      const data = localStorage.getItem('boardData');
+      if (data) board.innerHTML = data;
+    }
+
+    // Estrutura inicial exemplo
+    addColumn('Discovery & Design');
+    addColumn('Crédito & Core Banking');
+    addColumn('Integrações');
+    addColumn('QA & Sustentação');
+  </script>
+</body>
+</html>
